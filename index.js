@@ -1,32 +1,42 @@
 'use strict';
-var url = 'http://lpse.jakarta.go.id/eproc/';
 var request = require('request');
 var cheerio = require('cheerio');
 
-request(url + 'lelang', function(err, response, html) {
-  var $ = cheerio.load(html);
+var LPSEParser = function(url) {
+  this.url = url;
+}
 
-  var packages = [];
-  $('.horizLineTop').filter(function() {
-    var data = $(this);
+LPSEParser.prototype.lelang = function() {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    request(self.url + '/lelang', function(err, response, html) {
+      if (err) return reject(err);
 
-    var title = data.find('.pkt_nama > b > a.jpopup').text();
-    var agency = data.find('.agc_nama').text();
-    var stage = data.find('.tahap > a.jpopup').text();
-    var hps = data.find('.pkt_hps > span').text();
-    var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
+      var $ = cheerio.load(html);
 
-    var entry = {
-      title: title,
-      agency: agency,
-      stage: stage,
-      hps: hps,
-      link: link
-    }
+      var packages = [];
+      $('.horizLineTop').filter(function() {
+        var data = $(this);
 
-    packages.push(entry);
+        var title = data.find('.pkt_nama > b > a.jpopup').text();
+        var agency = data.find('.agc_nama').text();
+        var stage = data.find('.tahap > a.jpopup').text();
+        var hps = data.find('.pkt_hps > span').text();
+        var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
+
+        var entry = {
+          title: title,
+          agency: agency,
+          stage: stage,
+          hps: hps,
+          link: link
+        }
+
+        packages.push(entry);
+      });
+      return resolve(packages);
+    });
   });
-  console.log(packages);
+}
 
-
-});
+module.exports = LPSEParser;
