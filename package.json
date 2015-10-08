@@ -4,7 +4,7 @@
   "description": "LPSE Parser",
   "main": "index.js",
   "scripts": {
-    "test": "./node-modules/.bin/mocha"
+    "test": "./node_modules/.bin/mocha"
   },
   "author": "Mohammad Anwari <mdamt@mdamt.net> (http://aksi.mdamt.net/)",
   "license": "MIT",
