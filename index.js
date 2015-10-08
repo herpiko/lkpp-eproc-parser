@@ -2,11 +2,11 @@
 var request = require('request');
 var cheerio = require('cheerio');
 
-var LPSEParser = function(url) {
+var EprocScraper = function(url) {
   this.url = url;
 }
 
-LPSEParser.prototype.lelang = function() {
+EprocScraper.prototype.lelang = function() {
   var self = this;
   return new Promise(function(resolve, reject) {
     request(self.url + '/lelang', function(err, response, html) {
@@ -39,4 +39,4 @@ LPSEParser.prototype.lelang = function() {
   });
 }
 
-module.exports = LPSEParser;
+module.exports = EprocScraper;

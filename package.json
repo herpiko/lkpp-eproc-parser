@@ -1,7 +1,7 @@
 {
-  "name": "lpse-parser",
+  "name": "lkpp-eproc-scraper",
   "version": "0.0.1",
-  "description": "LPSE Parser",
+  "description": "LKPP e-Proc Scraper",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha"
