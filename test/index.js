@@ -9,12 +9,24 @@ describe('e-Proc Scraper', function() {
     .replyWithFile(200, __dirname + '/assets/lelang-1.html');
 
   nock(url)
+    .get('/eproc/lelang.gridtable.pager/1?s=5')
+    .replyWithFile(200, __dirname + '/assets/lelang-1.html');
+
+  nock(url)
     .get('/eproc/publiclelangumum')
     .replyWithFile(200, __dirname + '/assets/lelang-2.html');
 
   nock(url)
     .get('/eproc/lelang/pemenangcari')
     .replyWithFile(200, __dirname + '/assets/lelang-3.html');
+
+  it('should return number of pages in lelang', function(done) {
+    var L = new EprocScraper(url + '/eproc');
+    L.lelangPages().then(function(pages) {
+      pages.should.equal(415);
+      done();
+    });
+  });
 
   it('should return packages', function(done) {
     var L = new EprocScraper(url + '/eproc');

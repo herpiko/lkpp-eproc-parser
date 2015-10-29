@@ -6,10 +6,11 @@ var EprocScraper = function(url) {
   this.url = url;
 }
 
-EprocScraper.prototype.lelang = function() {
+EprocScraper.prototype.lelang = function(page) {
   var self = this;
+  if (!page) page = 1;
   return new Promise(function(resolve, reject) {
-    request(self.url + '/lelang', function(err, response, html) {
+    request(self.url + '/lelang.gridtable.pager/' + page + '?s=5', function(err, response, html) {
       if (err) return reject(err);
 
       var $ = cheerio.load(html);
@@ -24,7 +25,6 @@ EprocScraper.prototype.lelang = function() {
         var hps = data.find('.pkt_hps > span').text();
         var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
         var id = link.substr(link.lastIndexOf('/') + 1);
-
         var entry = {
           title: title,
           agency: agency,
@@ -37,6 +37,26 @@ EprocScraper.prototype.lelang = function() {
         packages.push(entry);
       });
       return resolve(packages);
+    });
+  });
+}
+
+EprocScraper.prototype.lelangPages = function() {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    request(self.url + '/lelang', function(err, response, html) {
+      if (err) return reject(err);
+
+      var $ = cheerio.load(html);
+
+      var lastPage;
+      $('div.t-data-grid-pager').filter(function() {
+        var data = $(this);
+
+        var pages = data.find('a');
+        lastPage = $(pages[pages.length - 1]).text();
+      });
+      return resolve(parseInt(lastPage));
     });
   });
 }
