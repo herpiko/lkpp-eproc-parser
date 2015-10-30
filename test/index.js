@@ -5,11 +5,22 @@ var nock = require('nock');
 
 describe('e-Proc Scraper', function() {
   nock(url)
+    .filteringPath(function(path){
+      return path;
+    })
     .get('/eproc/lelang')
     .replyWithFile(200, __dirname + '/assets/lelang-1.html');
 
   nock(url)
-    .get('/eproc/lelang.gridtable.pager/1?s=5')
+    .filteringPath(function(path){
+      if (path.indexOf('/eproc/lelang.gridtable.pager') === 0) {
+        return '/eproc/lelang.gridtable.pager';
+      } else {
+        return path;
+      }
+    })
+    .get('/eproc/lelang.gridtable.pager')
+    .times(2)
     .replyWithFile(200, __dirname + '/assets/lelang-1.html');
 
   nock(url)
@@ -31,6 +42,18 @@ describe('e-Proc Scraper', function() {
   it('should return packages', function(done) {
     var L = new EprocScraper(url + '/eproc');
     L.lelang().then(function(packages) {
+      packages.length.should.equal(50);
+      for (var i = 0; i < packages.length; i++) {
+        var p = packages[i];
+        p.link.indexOf(p.id).should.equal(p.link.length - p.id.length);
+      }
+      done();
+    });
+  });
+
+  it('should return page 2 of packages', function(done) {
+    var L = new EprocScraper(url + '/eproc');
+    L.lelang(2).then(function(packages) {
       packages.length.should.equal(50);
       for (var i = 0; i < packages.length; i++) {
         var p = packages[i];

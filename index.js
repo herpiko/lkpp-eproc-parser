@@ -10,7 +10,8 @@ EprocScraper.prototype.lelang = function(page) {
   var self = this;
   if (!page) page = 1;
   return new Promise(function(resolve, reject) {
-    request(self.url + '/lelang.gridtable.pager/' + page + '?s=5', function(err, response, html) {
+    var url = self.url + '/lelang.gridtable.pager/' + page + '?s=5';
+    request(url, function(err, response, html) {
       if (err) return reject(err);
 
       var $ = cheerio.load(html);
