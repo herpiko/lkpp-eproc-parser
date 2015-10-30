@@ -6,7 +6,49 @@ var EprocScraper = function(url) {
   this.url = url;
 }
 
-EprocScraper.prototype.lelang = function(page) {
+EprocScraper.prototype.lelangGetDate = function(id) {
+  var self = this;
+  var months = {
+    'Januari': 1, 
+    'Februari': 2, 
+    'Maret': 3, 
+    'April': 4, 
+    'Mei': 5, 
+    'Juni': 6, 
+    'Juli': 7, 
+    'Agustus': 8,
+    'September': 9, 
+    'Oktober': 10, 
+    'November': 11, 
+    'Desember': 12
+  }
+  return new Promise(function(resolve, reject) {
+    var url = self.url + '/lelang/tahap/' + id;
+    request(url, function(err, response, html) {
+      if (err) return reject(err);
+
+      var $ = cheerio.load(html);
+
+      var firstDate;
+      $('tr').filter(function() {
+        var data = $(this);
+        var lines = data.find('td.horizLineSel');
+        var d = $(lines).text().split(' ');
+        if (d[0] && d[1] && d[2]) {
+          firstDate = new Date(
+              parseInt(d[2]),
+              months[d[1]] - 1,
+              parseInt(d[0])
+              );
+        }
+      });
+      return resolve(firstDate);
+    });
+  });
+}
+
+
+EprocScraper.prototype.lelang = function(page, cb) {
   var self = this;
   if (!page) page = 1;
   return new Promise(function(resolve, reject) {
@@ -37,7 +79,27 @@ EprocScraper.prototype.lelang = function(page) {
 
         packages.push(entry);
       });
-      return resolve(packages);
+      if (cb) {
+        cb(page);
+      }
+
+      var getDate = function(i) {
+        self.lelangGetDate(packages[i].id)
+          .then(function(date) {
+            packages[i].date = date;
+            if ((i + 1)< packages.length) {
+              getDate(i + 1);
+            } else {
+              return resolve(packages);
+            }
+          });
+      }
+
+      if (packages.length > 0) {
+        getDate(0);
+      } else {
+        resolve([]);
+      }
     });
   });
 }

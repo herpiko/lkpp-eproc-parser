@@ -20,8 +20,43 @@ describe('e-Proc Scraper', function() {
       }
     })
     .get('/eproc/lelang.gridtable.pager')
-    .times(2)
     .replyWithFile(200, __dirname + '/assets/lelang-1.html');
+
+  nock(url)
+    .filteringPath(function(path){
+      if (path.indexOf('/eproc/lelang/tahap') === 0) {
+        return '/eproc/lelang/tahap';
+      } else {
+        return path;
+      }
+    })
+    .get('/eproc/lelang/tahap')
+    .times(50)
+    .replyWithFile(200, __dirname + '/assets/lelang-4.html');
+
+  nock(url)
+    .filteringPath(function(path){
+      if (path.indexOf('/eproc/lelang.gridtable.pager') === 0) {
+        return '/eproc/lelang.gridtable.pager';
+      } else {
+        return path;
+      }
+    })
+    .get('/eproc/lelang.gridtable.pager')
+    .replyWithFile(200, __dirname + '/assets/lelang-1.html');
+
+  nock(url)
+    .filteringPath(function(path){
+      if (path.indexOf('/eproc/lelang/tahap') === 0) {
+        return '/eproc/lelang/tahap';
+      } else {
+        return path;
+      }
+    })
+    .get('/eproc/lelang/tahap')
+    .times(50)
+    .replyWithFile(200, __dirname + '/assets/lelang-4.html');
+
 
   nock(url)
     .get('/eproc/publiclelangumum')
@@ -43,10 +78,6 @@ describe('e-Proc Scraper', function() {
     var L = new EprocScraper(url + '/eproc');
     L.lelang().then(function(packages) {
       packages.length.should.equal(50);
-      for (var i = 0; i < packages.length; i++) {
-        var p = packages[i];
-        p.link.indexOf(p.id).should.equal(p.link.length - p.id.length);
-      }
       done();
     });
   });
@@ -55,10 +86,6 @@ describe('e-Proc Scraper', function() {
     var L = new EprocScraper(url + '/eproc');
     L.lelang(2).then(function(packages) {
       packages.length.should.equal(50);
-      for (var i = 0; i < packages.length; i++) {
-        var p = packages[i];
-        p.link.indexOf(p.id).should.equal(p.link.length - p.id.length);
-      }
       done();
     });
   });
