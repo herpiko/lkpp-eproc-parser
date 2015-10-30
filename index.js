@@ -25,7 +25,7 @@ EprocScraper.prototype.lelang = function(page) {
         var stage = data.find('.tahap > a.jpopup').text();
         var hps = data.find('.pkt_hps > span').text();
         var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
-        var id = link.substr(link.lastIndexOf('/') + 1);
+        var id = link.replace(/\/eproc\/lelang\/view\/([0-9]+).+/, '$1');
         var entry = {
           title: title,
           agency: agency,
