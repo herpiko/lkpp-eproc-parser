@@ -103,11 +103,13 @@ describe('e-Proc Scraper', function() {
   });
 
   it('should return the winning bidders', function(done) {
+    this.timeout(50000);
     var L = new EprocScraper(url + '/eproc');
     L.pemenang().then(function(winners) {
       winners.length.should.equal(30);
       for (var i = 0; i < winners.length; i++) {
         var p = winners[i];
+        p.winner.name.length.should.greaterThan(0);
         p.link.indexOf(p.id).should.equal(p.link.length - p.id.length);
       }
       done();
