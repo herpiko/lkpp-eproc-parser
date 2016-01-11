@@ -1,6 +1,7 @@
 'use strict';
 var request = require('request');
 var cheerio = require('cheerio');
+var async = require('async');
 
 var EprocScraper = function(url) {
   this.url = url;
@@ -187,8 +188,74 @@ EprocScraper.prototype.pemenang = function() {
         }
 
         packages.push(entry);
+
       });
-      return resolve(packages);
+      async.eachSeries(packages, function(p, cb){
+        self.namaPemenang(p.id)
+          .then(function(winner){
+            p.winner = winner;
+            cb();
+          })
+          .catch(function(err){
+            cb(err);
+          })
+      }, function(err){
+        if (err) {
+          return reject(err);
+        }
+        return resolve(packages);
+      });
+    });
+  });
+}
+
+EprocScraper.prototype.namaPemenang = function(id){
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    request(self.url + '/rekanan/lelangpeserta/' + id, function(err, response, html) {
+      if (err) return reject(err);
+
+      var $ = cheerio.load(html);
+      var finalWinner = false;
+      var winner;
+      var packages = [];
+      $("tr").filter(function(){
+        var data = $(this);
+        var score = data.find("th").text();
+        var name = data.find("td:nth-child(2)").text();
+        var entry = {
+          name : name,
+          score : score
+        }
+        if (score && parseFloat(score) > 0) {
+          packages.push(entry);
+        } else if (isNaN(parseFloat(score))){
+          if (!finalWinner) {
+            var str = data.find("td:nth-child(7) > img").attr("src");
+            if (str && str.indexOf("star.gif") > -1) {
+              winner = entry;
+              winner.status = "finalWinner";
+              finalWinner = true;
+            }
+          }
+        }
+      })
+      if (!finalWinner) {
+        packages.sort(function (a, b) {
+          if (a.score > b.score) {
+            return 1;
+          }
+          if (a.score < b.score) {
+            return -1;
+          }
+          return 0;
+        });
+        winner = packages[0];
+        winner.status = "highScore";
+      }
+      console.log("Winner of " + id);
+      console.log(winner);
+      return resolve(winner);
     });
   });
 }

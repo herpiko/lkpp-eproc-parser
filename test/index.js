@@ -65,6 +65,12 @@ describe('e-Proc Scraper', function() {
   nock(url)
     .get('/eproc/lelang/pemenangcari')
     .replyWithFile(200, __dirname + '/assets/lelang-3.html');
+  
+  nock(url)
+    .filteringPath(/\/eproc\/rekanan\/lelangpeserta\/[^&]*/g, '/eproc/rekanan/lelangpeserta/29931127')
+    .get('/eproc/rekanan/lelangpeserta/29931127')
+    .times(50)
+    .replyWithFile(200, __dirname + '/assets/lelang-5.html');
 
   it('should return number of pages in lelang', function(done) {
     var L = new EprocScraper(url + '/eproc');
@@ -108,6 +114,7 @@ describe('e-Proc Scraper', function() {
       winners.length.should.equal(30);
       for (var i = 0; i < winners.length; i++) {
         var p = winners[i];
+        p.winner.name.length.should.greaterThan(0);
         p.link.indexOf(p.id).should.equal(p.link.length - p.id.length);
       }
       done();
