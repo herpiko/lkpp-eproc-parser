@@ -125,10 +125,11 @@ EprocScraper.prototype.lelangPages = function() {
   });
 }
 
-EprocScraper.prototype.lelangUmum = function() {
+EprocScraper.prototype.lelangUmum = function(page) {
   var self = this;
+  page = page || 0;
   return new Promise(function(resolve, reject) {
-    request(self.url + '/publiclelangumum', function(err, response, html) {
+    request(self.url + '/publiclelangumum.grid.pager/' + page, function(err, response, html) {
       if (err) return reject(err);
 
       var $ = cheerio.load(html);
@@ -142,7 +143,7 @@ EprocScraper.prototype.lelangUmum = function() {
         var doc = data.find('.ambil_dok').text();
         var hps = data.find('.plp_hps > div').text();
         var link = data.find('.plp_nama_paket > a.jpopup').attr('href');;
-        var id = link.substr(link.lastIndexOf('/') + 1);
+        var id = link.substr(link.lastIndexOf('/') + 1).split(";")[0];
 
         var entry = {
           title: title,
@@ -160,10 +161,11 @@ EprocScraper.prototype.lelangUmum = function() {
   });
 }
 
-EprocScraper.prototype.pemenang = function() {
+EprocScraper.prototype.pemenang = function(page) {
   var self = this;
+  page = page || 0;
   return new Promise(function(resolve, reject) {
-    request(self.url + '/lelang/pemenangcari', function(err, response, html) {
+    request(self.url + '/lelang/pemenangcari.gridtable.pager/' + page, function(err, response, html) {
       if (err) return reject(err);
 
       var $ = cheerio.load(html);
@@ -176,7 +178,7 @@ EprocScraper.prototype.pemenang = function() {
         var agency = data.find('.agc_nama').text();
         var hps = data.find('.pkt_hps > span').text();
         var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
-        var id = link.substr(link.lastIndexOf('/') + 1);
+        var id = link.substr(link.lastIndexOf('/') + 1).split(";")[0];
 
  
         var entry = {
@@ -186,7 +188,6 @@ EprocScraper.prototype.pemenang = function() {
           link: link,
           id: id
         }
-
         packages.push(entry);
 
       });
@@ -217,7 +218,7 @@ EprocScraper.prototype.namaPemenang = function(id){
 
       var $ = cheerio.load(html);
       var finalWinner = false;
-      var winner;
+      var winner = {};
       var packages = [];
       $("tr").filter(function(){
         var data = $(this);
@@ -240,7 +241,7 @@ EprocScraper.prototype.namaPemenang = function(id){
           }
         }
       })
-      if (!finalWinner) {
+      if (!finalWinner && packages.length > 0) {
         packages.sort(function (a, b) {
           if (a.score > b.score) {
             return 1;
@@ -253,8 +254,6 @@ EprocScraper.prototype.namaPemenang = function(id){
         winner = packages[0];
         winner.status = "highScore";
       }
-      console.log("Winner of " + id);
-      console.log(winner);
       return resolve(winner);
     });
   });
