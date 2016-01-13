@@ -59,11 +59,11 @@ describe('e-Proc Scraper', function() {
 
 
   nock(url)
-    .get('/eproc/publiclelangumum')
+    .get('/eproc/publiclelangumum.grid.pager/0')
     .replyWithFile(200, __dirname + '/assets/lelang-2.html');
 
   nock(url)
-    .get('/eproc/lelang/pemenangcari')
+    .get('/eproc/lelang/pemenangcari.gridtable.pager/0')
     .replyWithFile(200, __dirname + '/assets/lelang-3.html');
   
   nock(url)
