@@ -71,6 +71,11 @@ describe('e-Proc Scraper', function() {
     .get('/eproc/rekanan/lelangpeserta/29931127')
     .times(50)
     .replyWithFile(200, __dirname + '/assets/lelang-5.html');
+  nock(url)
+    .filteringPath(/\/eproc\/lelang\/view\/[^&]*/g, '/eproc/rekanan/lelangpeserta/29931127')
+    .get('/eproc/rekanan/lelangpeserta/29931127')
+    .times(50)
+    .replyWithFile(200, __dirname + '/assets/lelang-6.html');
 
   it('should return number of pages in lelang', function(done) {
     var L = new EprocScraper(url + '/eproc');
@@ -109,8 +114,10 @@ describe('e-Proc Scraper', function() {
   });
 
   it('should return the winning bidders', function(done) {
+    this.timeout(50000);
     var L = new EprocScraper(url + '/eproc');
     L.pemenang().then(function(winners) {
+      console.log(winners);
       winners.length.should.equal(30);
       for (var i = 0; i < winners.length; i++) {
         var p = winners[i];
