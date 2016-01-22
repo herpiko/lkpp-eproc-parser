@@ -177,6 +177,7 @@ EprocScraper.prototype.pemenang = function(page) {
         var title = data.find('.pkt_nama > b > a.jpopup').text();
         var agency = data.find('.agc_nama').text();
         var hps = data.find('.pkt_hps > span').text();
+        var hpsValue = hps.split(",")[0].replace(/[^0-9]+/g,'');
         var link = data.find('.pkt_nama > b > a.jpopup').attr('href');;
         var id = link.substr(link.lastIndexOf('/') + 1).split(";")[0];
 
@@ -185,6 +186,7 @@ EprocScraper.prototype.pemenang = function(page) {
           title: title,
           agency: agency,
           hps: hps,
+          hpsValue: hpsValue,
           link: link,
           id: id
         }
@@ -230,14 +232,37 @@ EprocScraper.prototype.namaPemenang = function(id){
         }
         if (score && parseFloat(score) > 0) {
           packages.push(entry);
-        } else if (isNaN(parseFloat(score))){
-          if (!finalWinner) {
-            var str = data.find("td:nth-child(7) > img").attr("src");
-            if (str && str.indexOf("star.gif") > -1) {
-              winner = entry;
-              winner.status = "finalWinner";
-              finalWinner = true;
-            }
+        }
+        if (!finalWinner) {
+          var str = data.find("td:nth-child(7) > img").attr("src");
+          // /eproc/lelang/pemenang/ has inconsistent table column
+          // Try different column
+          var str2 = data.find("td:nth-child(8) > img").attr("src");
+          if (str && str.indexOf("star.gif") > -1) {
+            entry.correctedValue = data.find("td:nth-child(6)")
+                                    .text()
+                                    .split(",")[0]
+                                    .replace(/[^0-9]+/g,'');
+            entry.value = data.find("td:nth-child(5)")
+                                    .text()
+                                    .split(",")[0]
+                                    .replace(/[^0-9]+/g,'');
+            winner = entry;
+            winner.status = "finalWinner";
+            finalWinner = true;
+          }
+          if (str2 && str2.indexOf("star.gif") > -1) {
+            entry.correctedValue = data.find("td:nth-child(7)")
+                                    .text()
+                                    .split(",")[0]
+                                    .replace(/[^0-9]+/g,'');
+            entry.value = data.find("td:nth-child(6)")
+                                    .text()
+                                    .split(",")[0]
+                                    .replace(/[^0-9]+/g,'');
+            winner = entry;
+            winner.status = "finalWinner";
+            finalWinner = true;
           }
         }
       })
