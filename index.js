@@ -197,6 +197,10 @@ EprocScraper.prototype.pemenang = function(page) {
         self.namaPemenang(p.id)
           .then(function(winner){
             p.winner = winner;
+            return self.getYear(p.id);
+          })
+          .then(function(year){
+            p.year = year;
             cb();
           })
           .catch(function(err){
@@ -208,6 +212,27 @@ EprocScraper.prototype.pemenang = function(page) {
         }
         return resolve(packages);
       });
+    });
+  });
+}
+
+EprocScraper.prototype.getYear = function(id){
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    var url = self.url + '/lelang/view/' + id;
+    request(url, function(err, response, html) {
+      if (err) return reject(err);
+
+      var $ = cheerio.load(html);
+      var year;
+      $("tr").filter(function(){
+        var data = $(this);
+        var content = data.find("td").text();
+        if (content.indexOf("Anggaran") > -1 && content.indexOf("APBD") > -1) {
+          year = parseInt(content.replace(/[^0-9]+/g,''));
+        }
+      })
+      return resolve(year);
     });
   });
 }
